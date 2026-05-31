@@ -1,0 +1,31 @@
+{
+  "messages": [
+    {
+      "id": 1,
+      "text": "Hey {{name}}, how are you doing?",
+      "delay_after": 25
+    },
+    {
+      "id": 2,
+      "text": "I saw you in the group and thought I'd reach out 👋",
+      "delay_after": 30
+    },
+    {
+      "id": 3,
+      "text": "Would you be interested in a quick collab",
+      "delay_after": 20
+    },
+    {
+      "id": 4,
+      "text": "Hey, got a minute? I have something cool to share with you.",
+      "delay_after": 35
+    }
+  ],
+
+  "settings": {
+    "random_order": true,
+    "use_placeholders": true,
+    "min_delay": 20,
+    "max_delay": 45
+  }
+}
