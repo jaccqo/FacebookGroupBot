@@ -59,8 +59,14 @@ htmlcov/
 
 # Anthropic / AI usage
 
-data/ai_usage.json
-data/bot.db
+# Data files
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/*.json
+
+# Keep folder
+!data/.gitkeep
 
 # Temporary files
 
