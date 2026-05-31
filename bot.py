@@ -311,17 +311,88 @@ class FacebookBot:
         same_count_rounds = 0
         last_seen_count = 0
 
+        bad_name_words = [
+            "points",
+            "contribution",
+            "contributions",
+            "badge",
+            "badges",
+        ]
+
+        bad_url_parts = [
+            "/contributions/",
+            "/badges/",
+            "/posts/",
+            "/about/",
+            "/friends/",
+            "/photos/",
+            "/videos/",
+        ]
+
+        def is_valid_member_url(url: str) -> bool:
+            if not url:
+                return False
+
+            if "/groups/" not in url:
+                return False
+
+            if "/user/" not in url:
+                return False
+
+            for bad_part in bad_url_parts:
+                if bad_part in url:
+                    return False
+
+            parts = url.rstrip("/").split("/")
+
+            if "groups" not in parts:
+                return False
+
+            if "user" not in parts:
+                return False
+
+            user_index = parts.index("user")
+
+            # Must end exactly after /user/{id}
+            if len(parts) != user_index + 2:
+                return False
+
+            user_id = parts[user_index + 1]
+
+            if not user_id:
+                return False
+
+            return True
+
+        def is_valid_member_name(name: str) -> bool:
+            if not name:
+                return False
+
+            lowered = name.lower().strip()
+
+            for word in bad_name_words:
+                if word in lowered:
+                    return False
+
+            if lowered.isdigit():
+                return False
+
+            return True
+
         for i in range(max_scrolls):
             visible_members = await self.extract_visible_members(page)
             new_members = []
 
             for member in visible_members:
                 url = member.get("url", "").strip()
+                name = member.get("name", "").strip()
 
-                if not url:
+                if not is_valid_member_url(url):
+                    print(f"Skipping invalid member URL: {url}")
                     continue
 
-                if "/user/" not in url:
+                if not is_valid_member_name(name):
+                    print(f"Skipping invalid member name: {name} | {url}")
                     continue
 
                 if url in seen_urls:
@@ -444,7 +515,7 @@ class FacebookBot:
             await profile_page.close()
             return None
 
-    async def open_message_box(self, profile_page):
+    async def open_message_box(self, profile_page, member: dict):
         try:
             message_button = profile_page.locator(
                 'div[role="button"][aria-label="Message"]'
@@ -457,13 +528,16 @@ class FacebookBot:
             print("Clicked Message button")
 
             textbox = profile_page.locator(
-                'div[role="textbox"][contenteditable="true"]'
+                'div[role="textbox"][contenteditable="true"][aria-placeholder="Aa"][aria-label^="Write to"]'
             ).last
 
             await textbox.wait_for(timeout=15000)
             await textbox.click()
 
-            print("Message composer opened")
+            aria_label = await textbox.get_attribute("aria-label")
+
+            print(f"Message composer opened: {aria_label}")
+
             return textbox
 
         except Exception as e:
@@ -507,7 +581,8 @@ class FacebookBot:
             print("No message found in messages.json")
             return False
 
-        textbox = await self.open_message_box(profile_page)
+       
+        textbox = await self.open_message_box(profile_page, member)
 
         if not textbox:
             return False
@@ -523,22 +598,22 @@ class FacebookBot:
 
         await mark_member_message_drafted(member, message_text)
 
-        time.sleep(20)
+        await profile_page.wait_for_timeout(200)
 
-        # send_button = profile_page.locator(
-        #     '[aria-label="Press enter to send"]'
-        # )
+        send_button = profile_page.locator(
+            '[aria-label="Press enter to send"]'
+        )
 
 
-        # await send_button.wait_for(timeout=10000)
-        # await send_button.click()
+        await send_button.wait_for(timeout=10000)
+        await send_button.click()
 
-        # print(f"Sent message to {member['name']}")
+        print(f"Sent message to {member['name']}")
 
-        # await mark_member_message_sent(
-        #     member,
-        #     message_text,
-        # )
+        await mark_member_message_sent(
+            member,
+            message_text,
+        )
 
         return True
 
