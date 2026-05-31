@@ -14,12 +14,6 @@ ENV/
 .env
 .env.local
 
-# Database
-
-data/
-*.db
-*.sqlite
-*.sqlite3
 
 # Browser profiles
 
@@ -64,6 +58,9 @@ data/*.db
 data/*.sqlite
 data/*.sqlite3
 data/*.json
+
+profiles/*
+!profiles/.gitkeep
 
 # Keep folder
 !data/.gitkeep
