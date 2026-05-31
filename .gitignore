@@ -60,6 +60,7 @@ htmlcov/
 # Anthropic / AI usage
 
 data/ai_usage.json
+data/bot.db
 
 # Temporary files
 
