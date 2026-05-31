@@ -42,7 +42,7 @@ class BrowserManager:
                 "--disable-dev-shm-usage",
                 "--no-sandbox",
                 "--disable-gpu",
-                "--window-size=1366,768",
+                "--window-size=900,700",
             ],
         )
 
@@ -52,8 +52,8 @@ class BrowserManager:
             self.page = await self.context.new_page()
 
         await self.page.set_viewport_size({
-            "width": 1366,
-            "height": 768,
+            "width": 900,
+            "height": 700,
         })
 
         return self.page
